@@ -1,0 +1,27 @@
+Q1. Monthly revenue time series
+	1.Revenue peaks sharply in Sep–Nov, driven by pre-holiday gifting and bulk B2B orders — November alone reaches $1.51M, the highest month of the year.
+	2.A clear two-trough pattern: Feb ($524K) and Apr ($538K) are the weakest months, suggesting post-Christmas slowdowns and spring lulls.
+	3.Q4 forecast implication: The Q4 seasonal surge is consistent — the CEO can confidently plan for 60–80% above-average revenue in Nov and budget inventory and staffing accordingly for 2012.
+
+Q2. Revenue & quantity by country
+	1.Netherlands and EIRE lead at ~$285K and $283K respectively — nearly equal revenue despite EIRE having higher unit volume, implying Netherlands has a higher average order value.
+	2. Germany and France are strong mid-tier markets ($229K and $210K) — both show high quantity alongside revenue, making them volume-driven markets suitable for standardised catalogue products.
+	3.Australia ($139K) punches well despite geographic distance — a targeted logistics investment could unlock significantly more volume from this high-value market.
+
+Q3.Top 10 customers by revenue
+	1.Customer #14646 is the dominant account at $280K — 8% above #2 (#18102 at $260K). These two customers alone represent a significant concentration risk.
+	2.There is a steep revenue cliff between #1–3 ($280K–$195K) and #7–10 ($117K–$77K). The CMO should prioritise retention programmes for the top 3 specifically.
+	3.Customer #12346 (rank 10, $77K) — if this customer churns, they are easily replaceable; but customers #1–5 with $143K–$280K are individually irreplaceable and merit dedicated account management.
+
+Q4. Global demand map
+	1.Europe dominates demand volume — Netherlands, Germany, France, and EIRE cluster as the primary expansion targets, all with strong order volumes and existing revenue history.
+	2.Australia and Japan stand out as the only significant non-European markets — both are high-value, low-volume opportunities suited to premium or curated product ranges.
+	3.Expansion priority recommendation: Netherlands and EIRE for immediate scaling (infrastructure already working), Germany/France as the next tier, and Australia as a long-haul high-value target.
+	4.The map uses Quantity as bubble size, not Revenue — some high-quantity, low-price markets (e.g. EIRE) may appear larger than their actual revenue contribution suggests. Switching size to Revenue would give a more accurate picture for the CEO.
+
+
+insights : 
+	1.November is the standout month at $1.51M — Q4 seasonality is the single biggest revenue driver to plan around for 2012.
+	2.Customers #14646 and #18102 together represent a concentration risk the CMO should actively manage with retention programmes.
+	3.Netherlands and EIRE are the strongest international expansion targets, with Germany and France as the clear second tier.
+	4.The map uses Quantity (not Revenue) as bubble size — worth switching to Revenue for a more accurate picture of market value.
