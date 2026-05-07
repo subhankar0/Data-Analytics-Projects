@@ -1,0 +1,20 @@
+Analysis Breakdown Post-Data Preparation : 
+
+1. Attributes common among churners and churn prediction :
+A random forest model achieves 86% of accuracy and a ROC-AUC of 0.857. The top predictor in order : Age (24%), Estimated Salary (15%), Credit Score (14%) and Number of products (13%).
+Key patterns among churner and non churners : 	
+Churners are significantly older on average (44.8 vs 37.4 years)
+Churners hold higher balances (€91k vs €72k) — counterintuitively, wealthier customers leave more
+Inactive members churn at nearly double the rate of active ones (26.9% vs 14.3%)
+Customers with 3 or 4 products churn at alarming rates (83–100%), suggesting product overload or mis-selling
+Customers with 2 products churn the least (7.6%) — the sweet spot
+
+2. Overall Demographics
+The Bank's 10000 customers are majority male (55%), split across France(50%), Germany(25%) and Spain(25%). Average age is 38.9, 70.5% hold a credit card, and just over half (51.5%) are active members. About 36% carry a zero balance.
+
+3. Customer segments : 
+Four distinct segments emerge from clustering :
+Segment 0 - Young engaged loyalists (13% churns, fully active, lower balance)
+Segment 1 - Multi-product customers (12% churn, the best-retained group)
+Segment 2 - Inactive disengaged (29% churn, 3,247 customers, 0% active — the largest and most actionable retention target)
+Segment 3 -  Older high-churn customers (36% churn, avg age 60, high engagement but highest exit rate — needs tailored loyalty incentives)
