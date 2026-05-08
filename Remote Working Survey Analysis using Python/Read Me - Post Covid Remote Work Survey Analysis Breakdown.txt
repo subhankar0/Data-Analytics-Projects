@@ -1,0 +1,21 @@
+Here's a full breakdown of the analysis based on the four survey questions:
+
+1. How has COVID impacted remote work — and what's expected post-pandemic?
+Remote work exploded from an estimated ~8% pre-pandemic to 36% at the COVID peak (mid-2020). It stabilized to around 22–24% by late 2020/early 2021. Critically, 91% of respondents want at least some remote work to continue post-COVID, and only 9% prefer fully on-site. The most desired arrangement is 50/50 hybrid. Employer sentiment is cautiously optimistic — 49% of 2021 respondents think their employer will make structural changes to support remote work.
+
+2. Does remote working boost productivity?
+Yes, and the trend strengthened over time. In 2020, 57% said they were equally or more productive remotely. By 2021 this rose to 71%. The share reporting 30–50%+ higher productivity increased noticeably year-on-year, suggesting workers and organizations adapted and improved their remote setups.
+
+3. How does time use differ remotely vs on-site?
+Remote workers gain significantly from eliminating commute time — saving ~1.1 hrs/day in 2021 (down from 2.25h to 1.18h). That saved time redistributes into working slightly more (+0.3h), more personal/family time (+0.5h), and slightly more caring/domestic time (+0.2h). Wellbeing benefits are real: 60% feel better on remote days and 57% say they're more physically active.
+
+4. Biggest barriers to widespread remote work?
+The top barriers in 2020 were behavioral and social rather than technical: lack of motivation (2,211 selections), difficulty collaborating remotely (1,763), and feeling isolated (1,561) — all ranked above IT equipment or connectivity issues. By 2021, collaboration tools and software had improved (most respondents said these barriers "somewhat improved"), but isolation and motivation remained stubbornly persistent. These are the key human challenges organizations must address if remote work is to become the norm.
+
+Summary : 
+=> COVID caused a 4× spike in remote work (8% → 36%).
+=> Adoption stabilised at ~22% by 2021.
+=> Productivity: 57% report being same or more productive remotely in 2020; this rose to 71% by 2021.
+=> Remote workers save 1.1 hrs/day on commute, gain 0.3h working and 0.5h personal/family time.
+=> Biggest barriers: lack of motivation, collaboration difficulty, and isolation — not technology.
+=> 91% want some remote work post-COVID; only 9% prefer fully on-site.
