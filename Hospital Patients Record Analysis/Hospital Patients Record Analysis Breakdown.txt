@@ -1,0 +1,13 @@
+After analyzing the dataset here's a full breakdown of the analysis :
+
+Q1 — How many patients have been admitted or readmitted over time?
+Total encounters across 2011–2021 were 27,671. Admissions grew sharply from 1,336 in 2011 to a peak of 3,885 in 2014, likely reflecting a growing patient population being captured in the system. After 2014, volumes stabilised around 2,200–2,500 per year before spiking again to 3,530 in 2021, possibly reflecting a post-COVID care backlog. The 30-day readmission rate is a striking 62.1% — meaning nearly 2 in 3 encounters involved a patient who had been seen within the past month — which suggests a high proportion of chronic condition management in this population.
+
+Q2 — How long are patients staying in the hospital, on average?
+The overall average stay is 7.3 hours, but this is heavily skewed by the mix of encounter types. Breaking it down meaningfully: inpatient stays average 36.8 hours (roughly 1.5 days), ambulatory visits 9.5 hours, outpatient 5.9 hours, and emergency 1.5 hours. Urgent care and wellness visits are fixed at 15 minutes in the data. Inpatient LoS spiked notably in 2018 (126 hrs average) and remained elevated in 2020–2021, likely reflecting COVID-19's impact on bed occupancy and severity of illness.
+
+Q3 — How much is the average cost per visit?
+The mean cost per visit is $3,640, but the median is only $279 — a massive gap that signals a small number of very expensive encounters pulling the average up. By encounter type, inpatient is the most expensive at a mean of $7,761 (median $2,356), while urgent care visits average $6,369 in claims despite a median of just $143, pointing to extreme outliers. Outpatient is the most affordable at $2,237 mean. In terms of actual insurer payout, Medicaid covers the most per encounter ($5,834 avg), followed by Blue Cross Blue Shield ($2,243), while private insurers like Anthem, Cigna, and Aetna cover very little on average (under $2).
+
+Q4 — How many procedures are covered by insurance?
+68.3% of procedures (32,599 out of 47,701) were associated with an insured patient. The remaining 31.7% (15,102 procedures) had no insurance coverage at all. Medicare accounts for the largest share of insured procedures at 40.9% of all procedures, followed by Medicaid (6.1%), Humana (4.2%), and Cigna (3.4%). When looking at the quality of coverage, Medicaid covers ~74.6% of total claim costs on average — by far the most generous — while most private insurers (Humana, Aetna, Cigna, Anthem) cover less than 2% of costs on average, suggesting high out-of-pocket burdens even for insured patients.
