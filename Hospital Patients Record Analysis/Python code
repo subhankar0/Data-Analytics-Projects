@@ -188,8 +188,7 @@ def build_dashboard(enc, pro, pay):
     ax5.tick_params(axis="x", labelsize=7)
     ax5.spines[["top", "right", "left"]].set_visible(False)
     ax5.set_title("Avg Coverage %\nby Insurer", fontweight="bold", fontsize=10)
-    return fig
     
 if __name__ == "__main__":
     enc, pro, pay = load_data()
-    build_dashboard(enc, pro, pay)
+    fig = build_dashboard(enc, pro, pay)
