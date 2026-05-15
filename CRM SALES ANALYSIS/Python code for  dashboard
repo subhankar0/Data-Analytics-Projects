@@ -1,0 +1,261 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import matplotlib.ticker as mticker
+import matplotlib.gridspec as gridspec
+import matplotlib.patches as mpatches
+import warnings
+from rich.console import Console
+from rich.table import Table
+from rich import box
+
+warnings.filterwarnings("ignore")
+
+# --- Load Data ----------------------------------------------------------------
+def load_data():
+    pipeline = pd.read_csv("sales_pipeline.csv")
+    accounts = pd.read_csv("accounts.csv")
+    products = pd.read_csv("products.csv")
+    teams    = pd.read_csv("sales_teams.csv")
+
+    pipeline["engage_date"] = pd.to_datetime(pipeline["engage_date"])
+    pipeline["close_date"]  = pd.to_datetime(pipeline["close_date"])
+
+    merged = (pipeline.merge(teams, on="sales_agent", how="left").merge(products, on="product", how="left")
+              .merge(accounts, on="account", how="left"))
+
+    merged["cycle_days"] = (merged["close_date"] - merged["engage_date"]).dt.days
+    merged["close_month"] = merged["close_date"].dt.to_period("M")
+    merged["close_quarter"] = merged["close_date"].dt.to_period("Q")
+
+    return pipeline, accounts, products, teams, merged
+
+# --- Dashboard ---------------------------------------------------------
+def build_dashboard(merged):
+    won = merged[merged["deal_stage"] == "Won"]
+    lost = merged[merged["deal_stage"] == "Lost"]
+    total = len(merged)
+
+    fig = plt.figure(figsize=(22, 38), facecolor="#F8F8F6")
+    fig.suptitle("CRM SALES ANALYSIS — Dashboard", fontsize=20, fontweight="bold", y=0.995, color="#1A1A2E")
+
+    outer = gridspec.GridSpec(6, 1, figure=fig, height_ratios=[1.1, 2.2, 2.2, 2.2, 2.2, 2.2], hspace=0.55,
+        left=0.05, right=0.97, top=0.975, bottom=0.02
+    )
+
+    # --- KPI Cards ---------------------------------------------------------
+    kpi_gs = gridspec.GridSpecFromSubplotSpec(1, 6, subplot_spec=outer[0], wspace=0.25)
+
+    kpis = [
+        ("Total\nOpportunities", f"{total:,}", "tab:blue"),
+        ("Won\nDeals", f"{len(won):,}", "tab:green"),
+        ("Win\nRate", f"{len(won)/total*100:.1f}%", "tab:orange"),
+        ("Total Won\nRevenue", f"${won['close_value'].sum():,.0f}", "tab:purple"),
+        ("Avg Deal\nSize (Won)", f"${won['close_value'].mean():,.0f}", "tab:red"),
+        ("Avg Sales\nCycle", f"{won['cycle_days'].mean():.1f} days", "tab:gray"),
+    ]
+
+    for i, (label, value, color) in enumerate(kpis):
+        ax = fig.add_subplot(kpi_gs[0, i])
+        ax.set_facecolor("white")
+        for spine in ax.spines.values():
+            spine.set_edgecolor("#D0D0D0")
+            spine.set_linewidth(1.2)
+        ax.add_patch(mpatches.FancyBboxPatch((0.05, 0.80), 0.90, 0.12, boxstyle="round,pad=0.02", linewidth=0, facecolor=color,
+                                             transform=ax.transAxes, clip_on=False))
+        ax.set_xticks([]); ax.set_yticks([])
+        ax.text(0.5, 0.50, value, ha="center", va="center", fontsize=15, fontweight="bold", color="#1A1A2E", transform=ax.transAxes)
+        ax.text(0.5, 0.18, label, ha="center", va="center", fontsize=9, color="#666666", transform=ax.transAxes)
+
+    # --- Section 1 : Pipeline Overview ---------------------------------------------------
+    pip_gs = gridspec.GridSpecFromSubplotSpec(2, 3, subplot_spec=outer[1], hspace=0.5, wspace=0.38)
+
+    # 1a — Deal stage donut
+    ax1 = fig.add_subplot(pip_gs[0, 0])
+    stage_counts = merged["deal_stage"].value_counts()
+    _, _, autotexts = ax1.pie( stage_counts, labels=stage_counts.index, autopct="%1.1f%%",
+                               colors=["tab:blue", "tab:red", "tab:green", "tab:orange"], wedgeprops=dict(width=0.55),
+                               startangle=90, pctdistance=0.78, textprops={"fontsize": 9}
+    )
+    for at in autotexts: at.set_fontsize(8)
+    ax1.set_title("Pipeline by Stage", fontweight="bold", pad=8)
+
+    # 1b — Monthly won revenue
+    ax2 = fig.add_subplot(pip_gs[0, 1:])
+    monthly = won.groupby("close_month")["close_value"].sum().reset_index()
+    monthly["close_month"] = monthly["close_month"].astype(str)
+    ax2.fill_between(monthly["close_month"], monthly["close_value"], color="tab:blue", alpha=0.18)
+    ax2.plot(monthly["close_month"], monthly["close_value"],  color="tab:blue", linewidth=2.2, marker="o",
+             markersize=5, markerfacecolor="white", markeredgewidth=1.8)
+    ax2.set_title("Monthly Won Revenue", fontweight="bold")
+    ax2.yaxis.set_major_formatter(mticker.FuncFormatter(lambda x, _: f"${x/1e3:.0f}K"))
+    ax2.tick_params(axis="x", rotation=45, labelsize=8)
+
+    # 1c — Quarterly won revenue
+    ax3 = fig.add_subplot(pip_gs[1, 0])
+    q = won.groupby("close_quarter")["close_value"].sum().reset_index()
+    q["close_quarter"] = q["close_quarter"].astype(str)
+    bars = ax3.bar(q["close_quarter"], q["close_value"], color="tab:purple", width=0.5, edgecolor="white")
+    ax3.bar_label(bars, labels=[f"${v/1e6:.2f}M" for v in q["close_value"]], padding=4, fontsize=8)
+    ax3.set_title("Quarterly Won Revenue", fontweight="bold")
+    ax3.yaxis.set_major_formatter(mticker.FuncFormatter(lambda x, _: f"${x/1e6:.1f}M"))
+    ax3.tick_params(axis="x", labelsize=9)
+
+    # 1d — Revenue by region
+    ax4 = fig.add_subplot(pip_gs[1, 1])
+    reg = won.groupby("regional_office")["close_value"].sum().sort_values()
+    ax4.barh(reg.index, reg.values, color=["tab:green", "tab:blue", "tab:purple"], height=0.5)
+    ax4.xaxis.set_major_formatter(mticker.FuncFormatter(lambda x, _: f"${x/1e6:.1f}M"))
+    ax4.set_title("Revenue by Region", fontweight="bold")
+    for i, v in enumerate(reg.values):
+        ax4.text(v + 30000, i, f"${v/1e6:.2f}M", va="center", fontsize=8)
+
+    # 1e — Revenue by sector
+    ax5 = fig.add_subplot(pip_gs[1, 2])
+    sec = won.groupby("sector")["close_value"].sum().sort_values().tail(8)
+    ax5.barh(sec.index, sec.values, color="tab:red", height=0.6)
+    ax5.xaxis.set_major_formatter(mticker.FuncFormatter(lambda x, _: f"${x/1e6:.1f}M"))
+    ax5.set_title("Revenue by Sector (top 8)", fontweight="bold")
+
+    # --- Section 2 : Product Analysis ------------------------------------------------------------
+    prod_gs = gridspec.GridSpecFromSubplotSpec(1, 3, subplot_spec=outer[2], wspace=0.38)
+
+    # 2a — Revenue by product
+    ax6 = fig.add_subplot(prod_gs[0, 0])
+    prod_rev = won.groupby("product")["close_value"].sum().sort_values()
+    colors_p = ["tab:blue" if "GTX" in p
+                else ("tab:green" if "MG" in p else "tab:gray")
+                for p in prod_rev.index]
+    ax6.barh(prod_rev.index, prod_rev.values, color=colors_p, height=0.6)
+    ax6.xaxis.set_major_formatter(mticker.FuncFormatter(lambda x, _: f"${x/1e6:.1f}M"))
+    ax6.set_title("Revenue by Product", fontweight="bold")
+
+    # 2b — Deals won by product
+    ax7 = fig.add_subplot(prod_gs[0, 1])
+    prod_cnt = won.groupby("product").size().sort_values()
+    ax7.barh(prod_cnt.index, prod_cnt.values, color="tab:purple", height=0.6)
+    ax7.set_title("Deals Won by Product", fontweight="bold")
+
+    # 2c — Win rate by product
+    ax8 = fig.add_subplot(prod_gs[0, 2])
+    total_p = merged.groupby("product").size()
+    won_p = won.groupby("product").size()
+    wr = (won_p / total_p * 100).sort_values()
+    ax8.barh(wr.index, wr.values, color="tab:red", height=0.6)
+    ax8.set_xlabel("Win Rate (%)")
+    ax8.set_title("Win Rate by Product", fontweight="bold")
+    for i, v in enumerate(wr.values):
+        ax8.text(v + 0.5, i, f"{v:.1f}%", va="center", fontsize=8)
+
+    # --- Section 3 : Sales Team Performance ----------------------------------------------
+    team_gs = gridspec.GridSpecFromSubplotSpec(1, 3, subplot_spec=outer[3], wspace=0.38)
+
+    # 3a — Revenue by manager
+    ax9 = fig.add_subplot(team_gs[0, 0])
+    mgr = won.groupby("manager")["close_value"].sum().sort_values()
+    ax9.barh(mgr.index, mgr.values, color="tab:blue", height=0.55)
+    ax9.xaxis.set_major_formatter(mticker.FuncFormatter(lambda x, _: f"${x/1e6:.1f}M"))
+    ax9.set_title("Revenue by Manager", fontweight="bold")
+
+    # 3b — Top 10 agents by revenue
+    ax10 = fig.add_subplot(team_gs[0, 1])
+    agent_rev = (won.groupby("sales_agent")["close_value"].sum().sort_values(ascending=False).head(10).sort_values())
+    ax10.barh(agent_rev.index, agent_rev.values, color="tab:red", height=0.6)
+    ax10.xaxis.set_major_formatter(mticker.FuncFormatter(lambda x, _: f"${x/1e3:.0f}K"))
+    ax10.set_title("Top 10 Agents — Revenue", fontweight="bold")
+
+    # 3c — Top 10 agents by win rate
+    ax11 = fig.add_subplot(team_gs[0, 2])
+    total_a = merged.groupby("sales_agent").size()
+    won_a = won.groupby("sales_agent").size()
+    wr_a = (won_a / total_a * 100).sort_values(ascending=False).head(10).sort_values()
+    ax11.barh(wr_a.index, wr_a.values, color="tab:green", height=0.6)
+    ax11.set_xlabel("Win Rate (%)")
+    ax11.set_title("Top 10 Agents — Win Rate", fontweight="bold")
+    for i, v in enumerate(wr_a.values):
+        ax11.text(v + 0.3, i, f"{v:.1f}%", va="center", fontsize=8)
+
+    # --- Section 4 : Deals -----------------------------------------------------
+    dyn_gs = gridspec.GridSpecFromSubplotSpec(
+        1, 3, subplot_spec=outer[4], wspace=0.38)
+
+    # 4a — Sales cycle distribution
+    ax12 = fig.add_subplot(dyn_gs[0, 0])
+    ax12.hist(won["cycle_days"].dropna(), bins=30, color="tab:blue", edgecolor="white", linewidth=0.5)
+    ax12.axvline(won["cycle_days"].mean(), color="tab:red", linestyle="--", linewidth=1.5, label=f"Mean {won['cycle_days'].mean():.0f}d")
+    ax12.legend(fontsize=9)
+    ax12.set_xlabel("Days to close")
+    ax12.set_ylabel("Deals")
+    ax12.set_title("Sales Cycle Distribution", fontweight="bold")
+
+    # 4b — Avg cycle by manager
+    ax13 = fig.add_subplot(dyn_gs[0, 1])
+    cyc = won.groupby("manager")["cycle_days"].mean().sort_values()
+    ax13.barh(cyc.index, cyc.values, color="tab:purple", height=0.55)
+    ax13.set_xlabel("Avg days")
+    ax13.set_title("Avg Cycle by Manager", fontweight="bold")
+    for i, v in enumerate(cyc.values):
+        ax13.text(v + 0.5, i, f"{v:.0f}d", va="center", fontsize=8)
+
+    # 4c — Deal value: Won vs Lost
+    ax14 = fig.add_subplot(dyn_gs[0, 2])
+    wl_won  = merged[merged["deal_stage"] == "Won"]["close_value"].dropna()
+    wl_lost = merged[merged["deal_stage"] == "Lost"]["close_value"].dropna()
+    ax14.boxplot([wl_won, wl_lost], labels=["Won", "Lost"], patch_artist=True, boxprops=dict(facecolor="tab:green", alpha=0.5),
+                 medianprops=dict(color="tab:red", linewidth=2), flierprops=dict(marker=".", markersize=3, alpha=0.3))
+    ax14.set_ylabel("Deal value ($)")
+    ax14.yaxis.set_major_formatter(mticker.FuncFormatter(lambda x, _: f"${x/1e3:.0f}K"))
+    ax14.set_title("Deal Value — Won vs Lost", fontweight="bold")
+
+    # --- labels --------------------------------------------------------------------------
+    section_labels = {
+        0.965 : "KEY METRICS",
+        0.775 : "PIPELINE OVERVIEW",
+        0.560 : "PRODUCT ANALYSIS",
+        0.375 : "TEAM PERFORMANCE",
+        0.185 : "DEAL DYNAMICS",
+    }
+    for y_pos, label in section_labels.items():
+        fig.text(0.01, y_pos, label, fontsize=12, fontweight="bold", color="black", va="top", rotation=90, transform=fig.transFigure)
+
+# --- Analytical Insights ------------------------------------------------------
+def print_insights(merged):
+    won = merged[merged["deal_stage"] == "Won"]
+    lost = merged[merged["deal_stage"] == "Lost"]
+
+    total_a = merged.groupby("sales_agent").size()
+    won_a = won.groupby("sales_agent").size()
+    wr_a = won_a / total_a * 100
+    best_agent = wr_a.idxmax()
+
+    top_q = won.groupby("close_quarter")["close_value"].sum()
+    top_mgr = won.groupby("manager")["close_value"].sum()
+    top_sec = won.groupby("sector")["close_value"].sum()
+    top_reg = won.groupby("regional_office")["close_value"].sum()
+    top_prd = won.groupby("product")["close_value"].sum().sort_values(ascending=False)
+
+    insights = [
+        ("[1] Top Product", top_prd.index[0], f"${top_prd.iloc[0]:,.0f}"),
+        ("[2] Top Manager", top_mgr.idxmax(), f"${top_mgr.max():,.0f}"),
+        ("[3] Best Agent Win Rate", best_agent, f"{wr_a[best_agent]:.1f}%"),
+        ("[4] Top Sector", top_sec.idxmax(), f"${top_sec.max():,.0f}"),
+        ("[5] Top Region", top_reg.idxmax(), f"${top_reg.max():,.0f}"),
+        ("[6] Best Quarter", str(top_q.idxmax()), f"${top_q.max():,.0f}"),
+        ("[7] Lost Deals", f"{len(lost):,} deals", f"{len(lost)/len(merged)*100:.1f}% of pipeline"),
+    ]
+
+    console = Console()
+    console.print("\n[bold]ANALYTICAL INSIGHTS[/bold]")
+    table = Table(box=box.ROUNDED, show_header=True, padding=(0, 2))
+    table.add_column("Insight", style="bold cyan", min_width=25)
+    table.add_column("Item", style="white", min_width=25)
+    table.add_column("Value", style="bold yellow", justify="right", min_width=18)
+    for row in insights:
+        table.add_row(*row)
+    console.print(table)
+    console.print()
+
+# --- Main ---------------------------------------------------------------------
+if __name__ == "__main__":
+    pipeline, accounts, products, teams, merged = load_data()
+    build_dashboard(merged)
+    print_insights(merged)
